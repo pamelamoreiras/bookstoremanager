@@ -1,16 +1,16 @@
 package com.pamelamoreiras.bookstoremanager.books.entity;
 
 import com.pamelamoreiras.bookstoremanager.author.entity.Author;
+import com.pamelamoreiras.bookstoremanager.entity.Auditable;
 import com.pamelamoreiras.bookstoremanager.publishers.entity.Publisher;
 import com.pamelamoreiras.bookstoremanager.users.entity.User;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Data
 @Entity
-public class Book {
+public class Book extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
