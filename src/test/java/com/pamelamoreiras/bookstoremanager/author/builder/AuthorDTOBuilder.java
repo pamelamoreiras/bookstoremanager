@@ -15,7 +15,7 @@ public class AuthorDTOBuilder {
     @Builder.Default
     private final int age = 23;
 
-    public AuthorDTO buidAuthorDTO() {
+    public AuthorDTO buildAuthorDTO() {
         return new AuthorDTO(id, name, age);
     }
 }

@@ -16,7 +16,7 @@ public class Author extends Auditable {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String nome;
+    private String name;
 
     @Column(columnDefinition = "integer default 0")
     private int age;
