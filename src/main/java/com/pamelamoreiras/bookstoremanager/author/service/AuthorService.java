@@ -1,7 +1,9 @@
 package com.pamelamoreiras.bookstoremanager.author.service;
 
 import com.pamelamoreiras.bookstoremanager.author.dto.AuthorDTO;
+import com.pamelamoreiras.bookstoremanager.author.entity.Author;
 import com.pamelamoreiras.bookstoremanager.author.exception.AuthorAlreadyExistsException;
+import com.pamelamoreiras.bookstoremanager.author.exception.AuthorNotFoundException;
 import com.pamelamoreiras.bookstoremanager.author.mapper.AuthorMapper;
 import com.pamelamoreiras.bookstoremanager.author.repository.AuthorRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +26,13 @@ public class AuthorService {
         return authorMapper.toDTO(createdAuthor);
     }
 
-    private void verifyIfExists(String authorName) {
+    public AuthorDTO findById(final Long id) {
+        final var foundAuthor = authorRepository.findById(id)
+                .orElseThrow(() -> new AuthorNotFoundException(id));
+        return authorMapper.toDTO(foundAuthor);
+    }
+
+    private void verifyIfExists(final String authorName) {
         authorRepository.findByName(authorName)
                 .ifPresent(author -> {
                     throw new AuthorAlreadyExistsException(authorName);

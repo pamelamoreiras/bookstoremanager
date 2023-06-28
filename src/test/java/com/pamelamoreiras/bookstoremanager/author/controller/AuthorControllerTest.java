@@ -1,6 +1,7 @@
 package com.pamelamoreiras.bookstoremanager.author.controller;
 
 import com.pamelamoreiras.bookstoremanager.author.builder.AuthorDTOBuilder;
+import com.pamelamoreiras.bookstoremanager.author.dto.AuthorDTO;
 import com.pamelamoreiras.bookstoremanager.author.service.AuthorService;
 import com.pamelamoreiras.bookstoremanager.utils.JsonConversionUtils;
 import org.hamcrest.core.Is;
@@ -70,6 +71,23 @@ public class AuthorControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonConversionUtils.asJsonString(expectedAuthorToCreteDTO)))
                 .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void whenGETWithValidIdIsCalledThenStatusOkShouldBeReturn() throws Exception {
+
+        final var expectedFoundAuthorDTO = authorDTOBuilder.buildAuthorDTO();
+
+        when(authorService.findById(expectedFoundAuthorDTO.getId()))
+                .thenReturn(expectedFoundAuthorDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.get(AUTHOR_API_URL_PATH + "/" + expectedFoundAuthorDTO.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Is.is(expectedFoundAuthorDTO.getId().intValue())))
+                .andExpect(jsonPath("$.name", Is.is(expectedFoundAuthorDTO.getName())))
+                .andExpect(jsonPath("$.age", Is.is(expectedFoundAuthorDTO.getAge())));
 
     }
 }
