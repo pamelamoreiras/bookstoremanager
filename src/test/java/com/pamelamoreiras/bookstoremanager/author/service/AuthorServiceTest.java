@@ -1,7 +1,9 @@
 package com.pamelamoreiras.bookstoremanager.author.service;
 
 import com.pamelamoreiras.bookstoremanager.author.builder.AuthorDTOBuilder;
+import com.pamelamoreiras.bookstoremanager.author.dto.AuthorDTO;
 import com.pamelamoreiras.bookstoremanager.author.exception.AuthorAlreadyExistsException;
+import com.pamelamoreiras.bookstoremanager.author.exception.AuthorNotFoundException;
 import com.pamelamoreiras.bookstoremanager.author.mapper.AuthorMapper;
 import com.pamelamoreiras.bookstoremanager.author.repository.AuthorRepository;
 import org.hamcrest.core.IsEqual;
@@ -64,5 +66,30 @@ public class AuthorServiceTest {
                 .thenReturn(Optional.of(expectedCreatedAuthor));
 
         assertThrows(AuthorAlreadyExistsException.class, () -> authorService.create(expectedAuthorToCreteDTO));
+    }
+
+    @Test
+    void whenValidIdIsGivenThenAnAuthorShouldBeReturned() {
+
+        final var expectedFoundAuthorDTO = authorDTOBuilder.buildAuthorDTO();
+        final var expectedFoundAuthor = authorMapper.toModel(expectedFoundAuthorDTO);
+
+        when(authorRepository.findById(expectedFoundAuthor.getId()))
+                .thenReturn(Optional.of(expectedFoundAuthor));
+
+        final var foundAuthor = authorService.findById(expectedFoundAuthorDTO.getId());
+
+        assertThat(foundAuthor, is(IsEqual.equalTo(expectedFoundAuthorDTO)));
+    }
+
+    @Test
+    void whenInvalidIdIsGivenThenAnExceptionShouldBeThrown() {
+
+        final var expectedFoundAuthorDTO = authorDTOBuilder.buildAuthorDTO();
+
+        when(authorRepository.findById(expectedFoundAuthorDTO.getId()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(AuthorNotFoundException.class, () -> authorService.findById(expectedFoundAuthorDTO.getId()));
     }
 }
