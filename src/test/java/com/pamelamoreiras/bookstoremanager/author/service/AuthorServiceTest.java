@@ -1,7 +1,6 @@
 package com.pamelamoreiras.bookstoremanager.author.service;
 
 import com.pamelamoreiras.bookstoremanager.author.builder.AuthorDTOBuilder;
-import com.pamelamoreiras.bookstoremanager.author.dto.AuthorDTO;
 import com.pamelamoreiras.bookstoremanager.author.exception.AuthorAlreadyExistsException;
 import com.pamelamoreiras.bookstoremanager.author.exception.AuthorNotFoundException;
 import com.pamelamoreiras.bookstoremanager.author.mapper.AuthorMapper;
@@ -14,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -91,5 +91,28 @@ public class AuthorServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThrows(AuthorNotFoundException.class, () -> authorService.findById(expectedFoundAuthorDTO.getId()));
+    }
+
+    @Test
+    void whenListAuthorsIsCalledThenItShouldBeReturned() {
+        final var expectedFoundAuthorDTO = authorDTOBuilder.buildAuthorDTO();
+        final var expectedFoundAuthor = authorMapper.toModel(expectedFoundAuthorDTO);
+
+        when(authorRepository.findAll()).thenReturn(Collections.singletonList(expectedFoundAuthor));
+
+        final var foundAuthorsDTO = authorService.findAll();
+
+        assertThat(foundAuthorsDTO.size(), is(1));
+        assertThat(foundAuthorsDTO.get(0), is(IsEqual.equalTo(expectedFoundAuthorDTO)));
+    }
+
+    @Test
+    void whenListAuthorsIsCalledThenAnEmptyListShouldBeReturned() {
+
+        when(authorRepository.findAll()).thenReturn(Collections.EMPTY_LIST);
+
+        final var foundAuthorsDTO = authorService.findAll();
+
+        assertThat(foundAuthorsDTO.size(), is(0));
     }
 }
