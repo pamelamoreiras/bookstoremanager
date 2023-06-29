@@ -18,6 +18,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
+import java.util.Collections;
+
+import static org.hamcrest.core.Is.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -56,9 +59,9 @@ public class AuthorControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonConversionUtils.asJsonString(expectedAuthorToCreteDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", Is.is(expectedAuthorToCreteDTO.getId().intValue())))
-                .andExpect(jsonPath("$.name", Is.is(expectedAuthorToCreteDTO.getName())))
-                .andExpect(jsonPath("$.age", Is.is(expectedAuthorToCreteDTO.getAge())));
+                .andExpect(jsonPath("$.id", is(expectedAuthorToCreteDTO.getId().intValue())))
+                .andExpect(jsonPath("$.name", is(expectedAuthorToCreteDTO.getName())))
+                .andExpect(jsonPath("$.age", is(expectedAuthorToCreteDTO.getAge())));
     }
 
     @Test
@@ -85,9 +88,26 @@ public class AuthorControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get(AUTHOR_API_URL_PATH + "/" + expectedFoundAuthorDTO.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", Is.is(expectedFoundAuthorDTO.getId().intValue())))
-                .andExpect(jsonPath("$.name", Is.is(expectedFoundAuthorDTO.getName())))
-                .andExpect(jsonPath("$.age", Is.is(expectedFoundAuthorDTO.getAge())));
+                .andExpect(jsonPath("$.id", is(expectedFoundAuthorDTO.getId().intValue())))
+                .andExpect(jsonPath("$.name", is(expectedFoundAuthorDTO.getName())))
+                .andExpect(jsonPath("$.age", is(expectedFoundAuthorDTO.getAge())));
+
+    }
+
+    @Test
+    void whenGETListCalledThenStatusOkShouldBeReturned() throws Exception {
+
+        final var expectedFoundAuthorDTO = authorDTOBuilder.buildAuthorDTO();
+
+        when(authorService.findAll())
+                .thenReturn(Collections.singletonList(expectedFoundAuthorDTO));
+
+        mockMvc.perform(MockMvcRequestBuilders.get(AUTHOR_API_URL_PATH)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(expectedFoundAuthorDTO.getId().intValue())))
+                .andExpect(jsonPath("$[0].name", is(expectedFoundAuthorDTO.getName())))
+                .andExpect(jsonPath("$[0].age", is(expectedFoundAuthorDTO.getAge())));
 
     }
 }
