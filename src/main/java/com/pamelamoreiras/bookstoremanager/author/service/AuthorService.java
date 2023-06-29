@@ -30,9 +30,14 @@ public class AuthorService {
     }
 
     public AuthorDTO findById(final Long id) {
+        final Author foundAuthor = verifyAndGetAuthor(id);
+        return authorMapper.toDTO(foundAuthor);
+    }
+
+    private Author verifyAndGetAuthor(Long id) {
         final var foundAuthor = authorRepository.findById(id)
                 .orElseThrow(() -> new AuthorNotFoundException(id));
-        return authorMapper.toDTO(foundAuthor);
+        return foundAuthor;
     }
 
     public List<AuthorDTO> findAll() {
@@ -40,6 +45,11 @@ public class AuthorService {
                 .stream()
                 .map(authorMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    public void delete(Long id) {
+        verifyAndGetAuthor(id);
+        authorRepository.deleteById(id);
     }
 
     private void verifyIfExists(final String authorName) {

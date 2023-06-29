@@ -110,4 +110,17 @@ public class AuthorControllerTest {
                 .andExpect(jsonPath("$[0].age", is(expectedFoundAuthorDTO.getAge())));
 
     }
+
+    @Test
+    void whenDELETEWithValidIdIsCalledThenNoContentShouldBeReturned() throws Exception {
+        final var expectedAuthorDeletedDTO = authorDTOBuilder.buildAuthorDTO();
+
+        final var expectedAuthorDeletedId = expectedAuthorDeletedDTO.getId();
+        doNothing().when(authorService).delete(expectedAuthorDeletedId);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(AUTHOR_API_URL_PATH + "/" + expectedAuthorDeletedId)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+        
+    }
 }
