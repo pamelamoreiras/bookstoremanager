@@ -1,5 +1,7 @@
 package com.pamelamoreiras.bookstoremanager.publishers.service;
 
+import com.pamelamoreiras.bookstoremanager.publishers.dto.PublisherDTO;
+import com.pamelamoreiras.bookstoremanager.publishers.exception.PublisherAlreadyExistsException;
 import com.pamelamoreiras.bookstoremanager.publishers.mapper.PublisherMapper;
 import com.pamelamoreiras.bookstoremanager.publishers.repository.PublisherRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,5 +15,21 @@ public class PublisherService {
 
     private final PublisherRepository publisherRepository;
 
+    public PublisherDTO create(final PublisherDTO publisherDTO) {
 
+        verifyIfExists(publisherDTO.getName(), publisherDTO.getCode());
+
+        final var publisherToCreate = publisherMapper.toModel(publisherDTO);
+        final var createdPublisher = publisherRepository.save(publisherToCreate);
+
+        return publisherMapper.toDTO(createdPublisher);
+    }
+
+    private void verifyIfExists(final String name, final String code) {
+        final var duplicatedPublisher = publisherRepository.findByNameOrCode(name, code);
+
+        if (duplicatedPublisher.isPresent()) {
+            throw new PublisherAlreadyExistsException(name, code);
+        }
+    }
 }
