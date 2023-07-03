@@ -8,6 +8,9 @@ import com.pamelamoreiras.bookstoremanager.publishers.repository.PublisherReposi
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class PublisherService {
@@ -30,6 +33,12 @@ public class PublisherService {
         return publisherRepository.findById(id)
                 .map(publisherMapper::toDTO)
                 .orElseThrow(() -> new PublisherNotFoundException(id));
+    }
+
+    public List<PublisherDTO> findAll() {
+        return publisherRepository.findAll().stream()
+                .map(publisherMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     private void verifyIfExists(final String name, final String code) {
