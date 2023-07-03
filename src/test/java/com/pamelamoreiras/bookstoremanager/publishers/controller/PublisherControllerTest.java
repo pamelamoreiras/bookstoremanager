@@ -109,4 +109,16 @@ public class PublisherControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].code", Matchers.is(expectedPublisherFoundDTO.getCode())));
 
     }
+
+    @Test
+    void whenDELETEWithValidIdIsCalledThenNoContentShouldBeInformed() throws Exception {
+        final var expectedPublisherToDeleteDTO = publisherDTOBuilder.buildPublisherDTO();
+        var expectedPublisherIdToDeleted = expectedPublisherToDeleteDTO.getId();
+
+        Mockito.doNothing().when(publisherService).deleteById(expectedPublisherIdToDeleted);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(PUBLISHERS_API_URL_PATH + "/" + expectedPublisherIdToDeleted)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
 }
