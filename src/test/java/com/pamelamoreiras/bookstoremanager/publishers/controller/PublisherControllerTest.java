@@ -75,4 +75,21 @@ public class PublisherControllerTest {
                         .content(JsonConversionUtils.asJsonString(expectedCreatedPublisherDTO)))
                         .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
+
+    @Test
+    void whenGETWhitValidIdIsCalledThenOkStatusShouldBeInformed() throws Exception {
+        final var expectedPublisherFoundDTO = publisherDTOBuilder.buildPublisherDTO();
+        final var expectedPublisherFoundDTOId = expectedPublisherFoundDTO.getId();
+
+        Mockito.when(publisherService.findById(expectedPublisherFoundDTOId)).thenReturn(expectedPublisherFoundDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.get(PUBLISHERS_API_URL_PATH + "/" + expectedPublisherFoundDTOId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonConversionUtils.asJsonString(expectedPublisherFoundDTO)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id", Matchers.is(expectedPublisherFoundDTOId.intValue())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name", Matchers.is(expectedPublisherFoundDTO.getName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.code", Matchers.is(expectedPublisherFoundDTO.getCode())));
+
+    }
 }
