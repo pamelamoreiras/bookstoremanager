@@ -29,10 +29,15 @@ public class PublisherService {
         return publisherMapper.toDTO(createdPublisher);
     }
 
-    public PublisherDTO findById(Long id) {
+    public PublisherDTO findById(final Long id) {
         return publisherRepository.findById(id)
                 .map(publisherMapper::toDTO)
                 .orElseThrow(() -> new PublisherNotFoundException(id));
+    }
+
+    public void deleteById(final Long id) {
+        verifyIfExists(id);
+        publisherRepository.deleteById(id);
     }
 
     public List<PublisherDTO> findAll() {
@@ -47,5 +52,10 @@ public class PublisherService {
         if (duplicatedPublisher.isPresent()) {
             throw new PublisherAlreadyExistsException(name, code);
         }
+    }
+
+    private void verifyIfExists(Long id) {
+        publisherRepository.findById(id)
+                .orElseThrow(() -> new PublisherNotFoundException(id));
     }
 }
