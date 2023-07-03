@@ -2,6 +2,7 @@ package com.pamelamoreiras.bookstoremanager.publishers.service;
 
 import com.pamelamoreiras.bookstoremanager.publishers.dto.PublisherDTO;
 import com.pamelamoreiras.bookstoremanager.publishers.exception.PublisherAlreadyExistsException;
+import com.pamelamoreiras.bookstoremanager.publishers.exception.PublisherNotFoundException;
 import com.pamelamoreiras.bookstoremanager.publishers.mapper.PublisherMapper;
 import com.pamelamoreiras.bookstoremanager.publishers.repository.PublisherRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,12 @@ public class PublisherService {
         final var createdPublisher = publisherRepository.save(publisherToCreate);
 
         return publisherMapper.toDTO(createdPublisher);
+    }
+
+    public PublisherDTO findById(Long id) {
+        return publisherRepository.findById(id)
+                .map(publisherMapper::toDTO)
+                .orElseThrow(() -> new PublisherNotFoundException(id));
     }
 
     private void verifyIfExists(final String name, final String code) {
