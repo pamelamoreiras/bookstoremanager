@@ -37,7 +37,7 @@ public class User extends Auditable {
     private String password;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP")
-    private LocalDate birthDate;
+    private LocalDate birthdate;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Book> books;
