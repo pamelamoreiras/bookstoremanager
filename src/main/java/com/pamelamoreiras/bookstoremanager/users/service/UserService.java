@@ -4,6 +4,7 @@ import com.pamelamoreiras.bookstoremanager.users.dto.MessageDTO;
 import com.pamelamoreiras.bookstoremanager.users.dto.UserDTO;
 import com.pamelamoreiras.bookstoremanager.users.entity.User;
 import com.pamelamoreiras.bookstoremanager.users.exception.UserAlreadyExistsException;
+import com.pamelamoreiras.bookstoremanager.users.exception.UserNotFoundException;
 import com.pamelamoreiras.bookstoremanager.users.mapper.UserMapper;
 import com.pamelamoreiras.bookstoremanager.users.reposirory.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,15 @@ public class UserService {
         final var userToCreate = userMapper.toModel(userToCreateDTO);
         final var createdUser = userRepository.save(userToCreate);
         return creationMessage(createdUser);
+    }
+
+    public void delete(Long id) {
+        verifyIfExists(id);
+        userRepository.deleteById(id);
+    }
+
+    private void verifyIfExists(Long id) {
+        userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 
     private void verifyIfExists(String email, String username) {
