@@ -10,6 +10,9 @@ import com.pamelamoreiras.bookstoremanager.users.reposirory.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import static com.pamelamoreiras.bookstoremanager.users.utils.MessageDTOUtils.creationMessage;
+import static com.pamelamoreiras.bookstoremanager.users.utils.MessageDTOUtils.updatedMessage;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -26,29 +29,31 @@ public class UserService {
         return creationMessage(createdUser);
     }
 
-    public void delete(Long id) {
-        verifyIfExists(id);
+    public MessageDTO update(final Long id, final UserDTO userToUpdateDTO) {
+        final var foundUser = verifyAndGetIfExists(id);
+        userToUpdateDTO.setId(foundUser.getId());
+
+        final var userToUpdate = userMapper.toModel(userToUpdateDTO);
+        userToUpdate.setCreatedDate(foundUser.getCreatedDate());
+
+        final var updatedUser = userRepository.save(userToUpdate);
+        return updatedMessage(updatedUser);
+    }
+
+    public void delete(final Long id) {
+        verifyAndGetIfExists(id);
         userRepository.deleteById(id);
     }
 
-    private void verifyIfExists(Long id) {
-        userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+    private User verifyAndGetIfExists(final Long id) {
+         return userRepository.findById(id)
+                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
-    private void verifyIfExists(String email, String username) {
+    private void verifyIfExists(final String email, final String username) {
         final var foundUser = userRepository.findByEmailOrUsername(email, username);
         if (foundUser.isPresent()) {
             throw new UserAlreadyExistsException(email, username);
         }
-    }
-
-    private static MessageDTO creationMessage(final User createdUser) {
-        final var createdUserName = createdUser.getUsername();
-        final var createdUserId = createdUser.getId();
-        final var createdUserMessage = String.format("User %s with ID %s successfully created", createdUserName, createdUserId);
-
-        return MessageDTO.builder()
-                .message(createdUserMessage)
-                .build();
     }
 }

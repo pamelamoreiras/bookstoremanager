@@ -49,7 +49,7 @@ public class UserControllerTest {
     @Test
     void whenPOSTIsCalledThenStatusCreatedShouldBeReturned() throws Exception{
         final var expectedUserToCreateDTO = userDTOBuilder.buildUserDTO();
-        final var expectedCreationMessage = "User pamelamoreiras with 1 successfully created";
+        final var expectedCreationMessage = "User pamelamoreiras with ID 1 successfully created";
         final var expectedCreationMessageDTO = MessageDTO.builder()
                 .message(expectedCreationMessage)
                 .build();
@@ -84,5 +84,22 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
+    }
+
+    @Test
+    void whenPUTIsCalledThenOkStatusShouldBeReturned() throws Exception{
+        final var expectedUserToUpdateDTO = userDTOBuilder.buildUserDTO();
+        expectedUserToUpdateDTO.setUsername("pamelaUpdate");
+        final var expectedUpdatedMessage = "User pamelaUpdate with ID 1 successfully updated";
+        final var expectedUpdatedMessageDTO = MessageDTO.builder().message(expectedUpdatedMessage).build();
+        final var expectedUserToUpdateId = expectedUserToUpdateDTO.getId();
+
+        when(userService.update(expectedUserToUpdateId, expectedUserToUpdateDTO)).thenReturn(expectedUpdatedMessageDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.put(USER_API_URL_PATH + "/" + expectedUserToUpdateId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonConversionUtils.asJsonString(expectedUserToUpdateDTO)))
+                        .andExpect(MockMvcResultMatchers.status().isOk())
+                        .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is(expectedUpdatedMessage)));
     }
 }
