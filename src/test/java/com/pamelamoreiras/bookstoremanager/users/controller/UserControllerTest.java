@@ -2,7 +2,6 @@ package com.pamelamoreiras.bookstoremanager.users.controller;
 
 import com.pamelamoreiras.bookstoremanager.users.builder.UserDTOBuilder;
 import com.pamelamoreiras.bookstoremanager.users.dto.MessageDTO;
-import com.pamelamoreiras.bookstoremanager.users.mapper.UserMapper;
 import com.pamelamoreiras.bookstoremanager.users.service.UserService;
 import com.pamelamoreiras.bookstoremanager.utils.JsonConversionUtils;
 import org.hamcrest.Matchers;
@@ -11,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
@@ -21,7 +19,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class UserControllerTest {
@@ -73,5 +72,17 @@ public class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonConversionUtils.asJsonString(expectedUserToCreateDTO)))
                         .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @Test
+    void whenDELETEWithValidIdIsCalledThenNoContentShouldBeInformed() throws Exception {
+        final var expectedUserToDeleteDTO = userDTOBuilder.buildUserDTO();
+
+        doNothing().when(userService).delete(expectedUserToDeleteDTO.getId());
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(USER_API_URL_PATH + "/" + expectedUserToDeleteDTO.getId())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
     }
 }

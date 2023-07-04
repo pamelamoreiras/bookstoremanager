@@ -2,6 +2,7 @@ package com.pamelamoreiras.bookstoremanager.users.service;
 
 import com.pamelamoreiras.bookstoremanager.users.builder.UserDTOBuilder;
 import com.pamelamoreiras.bookstoremanager.users.exception.UserAlreadyExistsException;
+import com.pamelamoreiras.bookstoremanager.users.exception.UserNotFoundException;
 import com.pamelamoreiras.bookstoremanager.users.mapper.UserMapper;
 import com.pamelamoreiras.bookstoremanager.users.reposirory.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -65,5 +66,29 @@ public class UserServiceTest {
         when(userRepository.findByEmailOrUsername(expectedDuplicatedEmail, expectedDuplicatedUsername)).thenReturn(Optional.of(expectedDuplicatedUser));
 
         assertThrows(UserAlreadyExistsException.class, () -> userService.create(expectedDuplicatedUserDTO));
+    }
+
+    @Test
+    void whenValidUserIsInformedThenItShouldBeDeleted() {
+        final var expectedDeletedUserDTO = userDTOBuilder.buildUserDTO();
+        final var expectedDeletedUser = userMapper.toModel(expectedDeletedUserDTO);
+        var expectedDeletedUserId = expectedDeletedUserDTO.getId();
+
+        when(userRepository.findById(expectedDeletedUserId)).thenReturn(Optional.of(expectedDeletedUser));
+        doNothing().when(userRepository).deleteById(expectedDeletedUserId);
+
+        userService.delete(expectedDeletedUserId);
+
+        verify(userRepository, times(1)).deleteById(expectedDeletedUserId);
+    }
+
+    @Test
+    void whenInvalidUserIdIsInformedThenAnExceptionShouldBeThrown() {
+        final var expectedDeletedUserDTO = userDTOBuilder.buildUserDTO();
+        var expectedDeletedUserId = expectedDeletedUserDTO.getId();
+
+        when(userRepository.findById(expectedDeletedUserId)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.delete(expectedDeletedUserId));
     }
 }
