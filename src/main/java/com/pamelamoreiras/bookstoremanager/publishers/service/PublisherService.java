@@ -54,7 +54,7 @@ public class PublisherService {
         }
     }
 
-    private void verifyIfExists(Long id) {
+    private void verifyIfExists(final Long id) {
         publisherRepository.findById(id)
                 .orElseThrow(() -> new PublisherNotFoundException(id));
     }
