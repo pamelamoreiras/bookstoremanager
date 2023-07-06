@@ -8,6 +8,7 @@ import com.pamelamoreiras.bookstoremanager.users.exception.UserNotFoundException
 import com.pamelamoreiras.bookstoremanager.users.mapper.UserMapper;
 import com.pamelamoreiras.bookstoremanager.users.reposirory.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import static com.pamelamoreiras.bookstoremanager.users.utils.MessageDTOUtils.creationMessage;
@@ -21,10 +22,15 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    private final PasswordEncoder passwordEncoder;
+
     public MessageDTO create(final UserDTO userToCreateDTO) {
         verifyIfExists(userToCreateDTO.getEmail(), userToCreateDTO.getUsername());
 
         final var userToCreate = userMapper.toModel(userToCreateDTO);
+
+        userToCreate.setPassword(passwordEncoder.encode(userToCreate.getPassword()));
+
         final var createdUser = userRepository.save(userToCreate);
         return creationMessage(createdUser);
     }
@@ -35,6 +41,7 @@ public class UserService {
 
         final var userToUpdate = userMapper.toModel(userToUpdateDTO);
         userToUpdate.setCreatedDate(foundUser.getCreatedDate());
+        userToUpdate.setPassword(passwordEncoder.encode(userToUpdate.getPassword()));
 
         final var updatedUser = userRepository.save(userToUpdate);
         return updatedMessage(updatedUser);
