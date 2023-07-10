@@ -20,7 +20,7 @@ public class UserDTOBuilder {
     private int age = 23;
 
     @Builder.Default
-    private Gender gender = Gender.MALE;
+    private Gender gender = Gender.FEMALE;
 
     @Builder.Default
     private String email = "pamela@email.com";
