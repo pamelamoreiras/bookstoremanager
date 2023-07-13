@@ -1,7 +1,10 @@
 package com.pamelamoreiras.bookstoremanager.users.controller;
 
+import com.pamelamoreiras.bookstoremanager.users.builder.JwtRequestBuilder;
 import com.pamelamoreiras.bookstoremanager.users.builder.UserDTOBuilder;
+import com.pamelamoreiras.bookstoremanager.users.dto.JwtResponse;
 import com.pamelamoreiras.bookstoremanager.users.dto.MessageDTO;
+import com.pamelamoreiras.bookstoremanager.users.service.AuthenticationService;
 import com.pamelamoreiras.bookstoremanager.users.service.UserService;
 import com.pamelamoreiras.bookstoremanager.utils.JsonConversionUtils;
 import org.hamcrest.Matchers;
@@ -30,16 +33,22 @@ public class UserControllerTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private AuthenticationService authenticationService;
+
     @InjectMocks
     private UserController userController;
 
     private UserDTOBuilder userDTOBuilder;
+
+    private JwtRequestBuilder jwtRequestBuilder;
 
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         userDTOBuilder = UserDTOBuilder.builder().build();
+        jwtRequestBuilder = JwtRequestBuilder.builder().build();
         mockMvc = MockMvcBuilders.standaloneSetup(userController)
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .setViewResolvers((s, locale) -> new MappingJackson2JsonView())
@@ -101,5 +110,32 @@ public class UserControllerTest {
                         .content(JsonConversionUtils.asJsonString(expectedUserToUpdateDTO)))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is(expectedUpdatedMessage)));
+    }
+
+    @Test
+    void whenPOSTIsCalledToAuthenticateUserThenOkShouldBeReturned() throws Exception {
+        final var jwtRequest = jwtRequestBuilder.buildJwtRequest();
+        final var expectedJwtToken = JwtResponse.builder().jwtToken("fakeToken").build();
+
+        when(authenticationService.createAuthenticationToken(jwtRequest))
+                .thenReturn(expectedJwtToken);
+
+        mockMvc.perform(MockMvcRequestBuilders.post(USER_API_URL_PATH + "/authenticate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonConversionUtils.asJsonString(jwtRequest)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.jwtToken", Matchers.is(expectedJwtToken.getJwtToken())));
+    }
+
+
+    @Test
+    void whenPOSTIsCalledToAuthenticateUserWithOutPasswordThenBadRequestShouldBeReturned() throws Exception {
+        var jwtRequest = jwtRequestBuilder.buildJwtRequest();
+        jwtRequest.setPassword(null);
+
+        mockMvc.perform(MockMvcRequestBuilders.post(USER_API_URL_PATH + "/authenticate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonConversionUtils.asJsonString(jwtRequest)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 }
