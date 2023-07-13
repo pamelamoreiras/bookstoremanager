@@ -25,7 +25,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private JwtTokenManager jwtTokenManager;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws ServletException, IOException {
 
         var username = "";
         var jwtToken = "";
@@ -45,18 +45,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    private static boolean isTokenPresent(String requestTokenHeader) {
+    private static boolean isTokenPresent(final String requestTokenHeader) {
         return requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ");
     }
 
-    private static boolean isUsernameInContext(String username) {
-        return username != null && SecurityContextHolder.getContext().getAuthentication() == null;
+    private static boolean isUsernameInContext(final String username) {
+        return !username.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null;
     }
 
-    private void addUsernameInContext(HttpServletRequest request, String username, String jwtToken) {
+    private void addUsernameInContext(final HttpServletRequest request, final String username, final String jwtToken) {
         final var userDetails = authenticationService.loadUserByUsername(username);
 
-        if (jwtTokenManager.validateToken(jwtToken,userDetails)) {
+        if (jwtTokenManager.validateToken(jwtToken, userDetails)) {
             var authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);

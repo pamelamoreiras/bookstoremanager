@@ -1,7 +1,10 @@
 package com.pamelamoreiras.bookstoremanager.users.controller;
 
+import com.pamelamoreiras.bookstoremanager.users.dto.JwtRequest;
+import com.pamelamoreiras.bookstoremanager.users.dto.JwtResponse;
 import com.pamelamoreiras.bookstoremanager.users.dto.MessageDTO;
 import com.pamelamoreiras.bookstoremanager.users.dto.UserDTO;
+import com.pamelamoreiras.bookstoremanager.users.service.AuthenticationService;
 import com.pamelamoreiras.bookstoremanager.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,6 +18,8 @@ import javax.validation.Valid;
 public class UserController implements UserControllerDocs{
 
     private final UserService userService;
+
+    private final AuthenticationService authenticationService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -31,5 +36,10 @@ public class UserController implements UserControllerDocs{
     @PutMapping("/{id}")
     public MessageDTO update(@PathVariable Long id, @RequestBody @Valid UserDTO userToUpdateDTO) {
         return userService.update(id, userToUpdateDTO);
+    }
+
+    @PostMapping(value = "/authenticate")
+    public JwtResponse createAuthenticationToken(@RequestBody @Valid JwtRequest jwtRequest) {
+        return authenticationService.createAuthenticationToken(jwtRequest);
     }
 }
