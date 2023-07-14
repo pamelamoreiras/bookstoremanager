@@ -4,7 +4,6 @@ import com.pamelamoreiras.bookstoremanager.users.dto.AuthenticatedUser;
 import com.pamelamoreiras.bookstoremanager.users.dto.JwtRequest;
 import com.pamelamoreiras.bookstoremanager.users.dto.JwtResponse;
 import com.pamelamoreiras.bookstoremanager.users.reposirory.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,7 +35,7 @@ public class AuthenticationService implements UserDetailsService {
         final var token = jwtTokenManager.generateToken(userDetails);
 
         return JwtResponse.builder()
-                .jwtToken(token)
+                .token(token)
                 .build();
     }
 

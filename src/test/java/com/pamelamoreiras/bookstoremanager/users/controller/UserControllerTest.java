@@ -115,7 +115,7 @@ public class UserControllerTest {
     @Test
     void whenPOSTIsCalledToAuthenticateUserThenOkShouldBeReturned() throws Exception {
         final var jwtRequest = jwtRequestBuilder.buildJwtRequest();
-        final var expectedJwtToken = JwtResponse.builder().jwtToken("fakeToken").build();
+        final var expectedJwtToken = JwtResponse.builder().token("fakeToken").build();
 
         when(authenticationService.createAuthenticationToken(jwtRequest))
                 .thenReturn(expectedJwtToken);
@@ -124,7 +124,7 @@ public class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonConversionUtils.asJsonString(jwtRequest)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.jwtToken", Matchers.is(expectedJwtToken.getJwtToken())));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.jwtToken", Matchers.is(expectedJwtToken.getToken())));
     }
 
 
