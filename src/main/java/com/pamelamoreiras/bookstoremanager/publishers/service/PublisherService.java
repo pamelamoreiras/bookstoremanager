@@ -1,6 +1,7 @@
 package com.pamelamoreiras.bookstoremanager.publishers.service;
 
 import com.pamelamoreiras.bookstoremanager.publishers.dto.PublisherDTO;
+import com.pamelamoreiras.bookstoremanager.publishers.entity.Publisher;
 import com.pamelamoreiras.bookstoremanager.publishers.exception.PublisherAlreadyExistsException;
 import com.pamelamoreiras.bookstoremanager.publishers.exception.PublisherNotFoundException;
 import com.pamelamoreiras.bookstoremanager.publishers.mapper.PublisherMapper;
@@ -36,7 +37,7 @@ public class PublisherService {
     }
 
     public void deleteById(final Long id) {
-        verifyIfExists(id);
+        verifyAndGetIfExists(id);
         publisherRepository.deleteById(id);
     }
 
@@ -54,8 +55,8 @@ public class PublisherService {
         }
     }
 
-    private void verifyIfExists(final Long id) {
-        publisherRepository.findById(id)
+    public Publisher verifyAndGetIfExists(final Long id) {
+        return publisherRepository.findById(id)
                 .orElseThrow(() -> new PublisherNotFoundException(id));
     }
 }
