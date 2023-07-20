@@ -19,6 +19,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
+import java.util.Collections;
+
 import static com.pamelamoreiras.bookstoremanager.utils.JsonConversionUtils.asJsonString;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.any;
@@ -98,6 +100,20 @@ public class BookControllerTest {
                 .andExpect(jsonPath("$.id", is(expectedFoundBookDTO.getId().intValue())))
                 .andExpect(jsonPath("$.name", is(expectedFoundBookDTO.getName())))
                 .andExpect(jsonPath("$.isbn", is(expectedFoundBookDTO.getIsbn())));
+    }
+
+    @Test
+    void whenGETListIsCalledThenStatusOkShouldBeInformed() throws Exception {
+        final var expectedFoundBookDTO = bookResponseDTOBuilder.buildResponseBookDTO();
+
+        when(bookService.findAllByUser(ArgumentMatchers.any(AuthenticatedUser.class)))
+                .thenReturn(Collections.singletonList(expectedFoundBookDTO));
+
+        mockMvc.perform(MockMvcRequestBuilders.get(BOOKS_API_URL_PATH)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].id", is(expectedFoundBookDTO.getId().intValue())))
+                .andExpect(jsonPath("$[0].name", is(expectedFoundBookDTO.getName())))
+                .andExpect(jsonPath("$[0].isbn", is(expectedFoundBookDTO.getIsbn())));
     }
 
 }
