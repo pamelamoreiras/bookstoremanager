@@ -4,6 +4,7 @@ import com.pamelamoreiras.bookstoremanager.author.service.AuthorService;
 import com.pamelamoreiras.bookstoremanager.books.dto.BookRequestDTO;
 import com.pamelamoreiras.bookstoremanager.books.dto.BookResponseDTO;
 import com.pamelamoreiras.bookstoremanager.books.exception.BookAlreadyExistsException;
+import com.pamelamoreiras.bookstoremanager.books.exception.BookNotFoundException;
 import com.pamelamoreiras.bookstoremanager.books.mapper.BookMapper;
 import com.pamelamoreiras.bookstoremanager.books.repository.BookRepository;
 import com.pamelamoreiras.bookstoremanager.publishers.service.PublisherService;
@@ -42,6 +43,13 @@ public class BookService {
         final var savedBook = bookRepository.save(bookToSave);
 
         return bookMapper.toDTO(savedBook);
+    }
+
+    public BookResponseDTO findByIdAndUser(final AuthenticatedUser authenticatedUser, final Long bookId) {
+        final var foundAuthenticatedUser = userService.verifyAndGetUserIfExists(authenticatedUser.getUsername());
+        return bookRepository.findByIdAndUser(bookId, foundAuthenticatedUser)
+                .map(bookMapper::toDTO)
+                .orElseThrow(() -> new BookNotFoundException(bookId));
     }
 
     private void verifyIfBookIsAlreadyRegistered(final User foundUser, final BookRequestDTO bookRequestDTO) {

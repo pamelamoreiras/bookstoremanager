@@ -6,6 +6,7 @@ import com.pamelamoreiras.bookstoremanager.books.builder.BookRequestDTOBuilder;
 import com.pamelamoreiras.bookstoremanager.books.builder.BookResponseDTOBuilder;
 import com.pamelamoreiras.bookstoremanager.books.entity.Book;
 import com.pamelamoreiras.bookstoremanager.books.exception.BookAlreadyExistsException;
+import com.pamelamoreiras.bookstoremanager.books.exception.BookNotFoundException;
 import com.pamelamoreiras.bookstoremanager.books.mapper.BookMapper;
 import com.pamelamoreiras.bookstoremanager.books.repository.BookRepository;
 import com.pamelamoreiras.bookstoremanager.publishers.entity.Publisher;
@@ -94,5 +95,36 @@ public class BookServiceTest {
                 any(User.class))).thenReturn(Optional.of(expectedDuplicatedBook));
 
         assertThrows(BookAlreadyExistsException.class, () -> bookService.create(authenticatedUser, expectedBookToCreateDTO));
+    }
+
+    @Test
+    void whenExistingBookIsInformedThenABookShouldBeReturned() {
+        final var expectedBookToFindDTO = bookRequestDTOBuilder.buildRequestBookDTO();
+        final var expectedFoundBookDTO = bookResponseDTOBuilder.buildResponseBookDTO();
+        final var expectedFoundBook = bookMapper.toModel(expectedFoundBookDTO);
+
+        when(userService.verifyAndGetUserIfExists(authenticatedUser.getUsername()))
+                .thenReturn(new User());
+        when(bookRepository.findByIdAndUser(
+                eq(expectedBookToFindDTO.getId()),
+                any(User.class))).thenReturn(Optional.of(expectedFoundBook));
+
+        final var foundBookDTO = bookService.findByIdAndUser(authenticatedUser, expectedBookToFindDTO.getId());
+
+        assertThat(foundBookDTO, Matchers.is(equalTo(expectedFoundBookDTO)));
+    }
+
+    @Test
+    void whenNotExistingBookIsInformedThenAnExceptionShouldBeThrown() {
+        final var expectedBookToFindDTO = bookRequestDTOBuilder.buildRequestBookDTO();
+
+        when(userService.verifyAndGetUserIfExists(authenticatedUser.getUsername()))
+                .thenReturn(new User());
+        when(bookRepository.findByIdAndUser(
+                eq(expectedBookToFindDTO.getId()),
+                any(User.class))).thenReturn(Optional.empty());
+
+        assertThrows(BookNotFoundException.class,
+                () -> bookService.findByIdAndUser(authenticatedUser, expectedBookToFindDTO.getId()));
     }
 }
