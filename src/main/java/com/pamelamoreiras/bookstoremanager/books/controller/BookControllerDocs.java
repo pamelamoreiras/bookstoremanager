@@ -8,6 +8,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import java.util.List;
+
 @Api("Books module management")
 public interface BookControllerDocs {
 
@@ -20,8 +22,14 @@ public interface BookControllerDocs {
 
     @ApiOperation(value = "Book find by id and user operation")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Success book found"),
+            @ApiResponse(code = 200, message = "Success book found"),
             @ApiResponse(code = 404, message = "Book not found error")
     })
     BookResponseDTO findByIdAndUser(AuthenticatedUser authenticatedUser, Long bookId);
+
+    @ApiOperation(value = "List all books by a specific authenticated user operation")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Book list found by authenticated user informed")
+    })
+    List<BookResponseDTO> findAllByUser(AuthenticatedUser authenticatedUser);
 }
