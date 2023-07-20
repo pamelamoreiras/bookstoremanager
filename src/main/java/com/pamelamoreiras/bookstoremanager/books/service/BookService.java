@@ -3,6 +3,7 @@ package com.pamelamoreiras.bookstoremanager.books.service;
 import com.pamelamoreiras.bookstoremanager.author.service.AuthorService;
 import com.pamelamoreiras.bookstoremanager.books.dto.BookRequestDTO;
 import com.pamelamoreiras.bookstoremanager.books.dto.BookResponseDTO;
+import com.pamelamoreiras.bookstoremanager.books.entity.Book;
 import com.pamelamoreiras.bookstoremanager.books.exception.BookAlreadyExistsException;
 import com.pamelamoreiras.bookstoremanager.books.exception.BookNotFoundException;
 import com.pamelamoreiras.bookstoremanager.books.mapper.BookMapper;
@@ -13,6 +14,7 @@ import com.pamelamoreiras.bookstoremanager.users.entity.User;
 import com.pamelamoreiras.bookstoremanager.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,12 +57,25 @@ public class BookService {
                 .orElseThrow(() -> new BookNotFoundException(bookId));
     }
 
-    public List<BookResponseDTO> findAllByUser(AuthenticatedUser authenticatedUser) {
+    public List<BookResponseDTO> findAllByUser(final AuthenticatedUser authenticatedUser) {
         final var foundAuthenticatedUser = userService.verifyAndGetUserIfExists(authenticatedUser.getUsername());
 
         return bookRepository.findAllByUser(foundAuthenticatedUser).stream()
                 .map(bookMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteByIdAndUser(final AuthenticatedUser authenticatedUser, final Long bookId) {
+        final var foundAuthenticatedUser = userService.verifyAndGetUserIfExists(authenticatedUser.getUsername());
+        final var foundBookToDelete = verifyAndGetIfExists(bookId, foundAuthenticatedUser);
+
+        bookRepository.deleteByIdAndUser(foundBookToDelete.getId(), foundAuthenticatedUser);
+    }
+
+    private Book verifyAndGetIfExists(final Long bookId, final User foundAuthenticatedUser) {
+        return bookRepository.findByIdAndUser(bookId, foundAuthenticatedUser)
+                .orElseThrow(() -> new BookNotFoundException(bookId));
     }
 
     private void verifyIfBookIsAlreadyRegistered(final User foundUser, final BookRequestDTO bookRequestDTO) {
