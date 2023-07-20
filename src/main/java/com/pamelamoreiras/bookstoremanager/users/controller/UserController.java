@@ -42,4 +42,6 @@ public class UserController implements UserControllerDocs{
     public JwtResponse createAuthenticationToken(@RequestBody @Valid JwtRequest jwtRequest) {
         return authenticationService.createAuthenticationToken(jwtRequest);
     }
+
+
 }
