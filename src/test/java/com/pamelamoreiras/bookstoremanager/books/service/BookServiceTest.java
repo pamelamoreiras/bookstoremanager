@@ -179,4 +179,36 @@ public class BookServiceTest {
         assertThrows(BookNotFoundException.class, () -> bookService.deleteByIdAndUser(authenticatedUser, expectedBookToDeleteDTO.getId()));
     }
 
+    @Test
+    void whenExistingBookIdIsInformedThenItShouldBeUpdated() {
+        final var expectedBookToUpdateDTO = bookRequestDTOBuilder.buildRequestBookDTO();
+        final var expectedUpdatedBookDTO = bookResponseDTOBuilder.buildResponseBookDTO();
+        final var expectedUpdatedBook = bookMapper.toModel(expectedUpdatedBookDTO);
+
+        when(userService.verifyAndGetUserIfExists(authenticatedUser.getUsername())).thenReturn(new User());
+        when(bookRepository.findByIdAndUser(eq(expectedBookToUpdateDTO.getId()), any(User.class)))
+                .thenReturn(Optional.of(expectedUpdatedBook));
+        when(authorService.verifyAndGetIfExists(expectedBookToUpdateDTO.getAuthorId())).thenReturn(new Author());
+        when(publisherService.verifyAndGetIfExists(expectedBookToUpdateDTO.getPublisherId())).thenReturn(new Publisher());
+        when(bookRepository.save(any(Book.class))).thenReturn(expectedUpdatedBook);
+
+        final var updatedBookResponseDTO = bookService.updateByIdAndUser(
+                authenticatedUser,
+                expectedBookToUpdateDTO.getId(),
+                expectedBookToUpdateDTO);
+
+        assertThat(updatedBookResponseDTO, Matchers.is(equalTo(expectedUpdatedBookDTO)));
+    }
+
+    @Test
+    void whenNotExistingBookIsInformedForUpdateThenAnExceptionShouldBeThrown() {
+        final var expectedBookToUpdateDTO = bookRequestDTOBuilder.buildRequestBookDTO();
+
+        when(userService.verifyAndGetUserIfExists(authenticatedUser.getUsername())).thenReturn(new User());
+        when(bookRepository.findByIdAndUser(eq(expectedBookToUpdateDTO.getId()), any(User.class)))
+                .thenReturn(Optional.empty());
+
+        assertThrows(BookNotFoundException.class,
+                () -> bookService.updateByIdAndUser(authenticatedUser, expectedBookToUpdateDTO.getId(), expectedBookToUpdateDTO));
+    }
 }

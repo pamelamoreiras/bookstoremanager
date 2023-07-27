@@ -73,6 +73,23 @@ public class BookService {
         bookRepository.deleteByIdAndUser(foundBookToDelete.getId(), foundAuthenticatedUser);
     }
 
+    public BookResponseDTO updateByIdAndUser(final AuthenticatedUser authenticatedUser, final Long bookId, final BookRequestDTO bookRequestDTO) {
+        final var foundAuthenticatedUser = userService.verifyAndGetUserIfExists(authenticatedUser.getUsername());
+        final var foundBook= verifyAndGetIfExists(bookId, foundAuthenticatedUser);
+        final var foundAuthor = authorService.verifyAndGetIfExists(bookRequestDTO.getAuthorId());
+        final var foundPublisher = publisherService.verifyAndGetIfExists(bookRequestDTO.getPublisherId());
+
+        final var bookToUpdate = bookMapper.toModel(bookRequestDTO);
+        bookToUpdate.setId(foundBook.getId());
+        bookToUpdate.setUser(foundAuthenticatedUser);
+        bookToUpdate.setAuthor(foundAuthor);
+        bookToUpdate.setPublisher(foundPublisher);
+        bookToUpdate.setCreatedDate(foundBook.getCreatedDate());
+        Book updatedBook = bookRepository.save(bookToUpdate);
+        return bookMapper.toDTO(updatedBook);
+
+    }
+
     private Book verifyAndGetIfExists(final Long bookId, final User foundAuthenticatedUser) {
         return bookRepository.findByIdAndUser(bookId, foundAuthenticatedUser)
                 .orElseThrow(() -> new BookNotFoundException(bookId));
